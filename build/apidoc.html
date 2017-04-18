@@ -63,9 +63,53 @@
 
         <li>
 
+            <a class="apidocElementLiA" href="#apidoc.element.content-disposition.content-disposition">
+            function <span class="apidocSignatureSpan"></span>content-disposition
+            <span class="apidocSignatureSpan">(filename, options)</span>
+            </a>
+
+        </li>
+
+        <li>
+
             <a class="apidocElementLiA" href="#apidoc.element.content-disposition.parse">
             function <span class="apidocSignatureSpan">content-disposition.</span>parse
             <span class="apidocSignatureSpan">(string)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.content-disposition.toString">
+            function <span class="apidocSignatureSpan">content-disposition.</span>toString
+            <span class="apidocSignatureSpan">()</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.content-disposition.parse">module content-disposition.parse</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.content-disposition.parse.parse">
+            function <span class="apidocSignatureSpan">content-disposition.</span>parse
+            <span class="apidocSignatureSpan">(string)</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.content-disposition.toString">module content-disposition.toString</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.content-disposition.toString.toString">
+            function <span class="apidocSignatureSpan">content-disposition.</span>toString
+            <span class="apidocSignatureSpan">()</span>
             </a>
 
         </li>
@@ -76,6 +120,30 @@
 
 <div class="apidocSectionDiv">
 <h1><a href="#apidoc.module.content-disposition" id="apidoc.module.content-disposition">module content-disposition</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.content-disposition.content-disposition" id="apidoc.element.content-disposition.content-disposition">
+        function <span class="apidocSignatureSpan"></span>content-disposition
+        <span class="apidocSignatureSpan">(filename, options)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function contentDisposition(filename, options) {
+  var opts = options || {}
+
+  // get type
+  var type = opts.type || &#x27;attachment&#x27;
+
+  // get parameters
+  var params = createparams(filename, opts.fallback)
+
+  // format into string
+  return format(new ContentDisposition(type, params))
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
 
 
     <h2>
@@ -173,6 +241,176 @@ e2%82%ac%20rates.txt&#x27;);
 
 Parse a `Content-Disposition` header string. This automatically handles extended
 (&#x22;Unicode&#x22;) parameters by decoding them and providing them under the standard
+...</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.content-disposition.toString" id="apidoc.element.content-disposition.toString">
+        function <span class="apidocSignatureSpan">content-disposition.</span>toString
+        <span class="apidocSignatureSpan">()</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">toString = function () {
+    return text;
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+  var binary = encoded.replace(HEX_ESCAPE_REPLACE_REGEXP, pdecode)
+
+  switch (charset) {
+    case &#x27;iso-8859-1&#x27;:
+      value = getlatin1(binary)
+      break
+    case &#x27;utf-8&#x27;:
+      value = new Buffer(binary, &#x27;binary&#x27;).<span class="apidocCodeKeywordSpan">toString</span>(&#x27;utf8&#x27;)
+      break
+    default:
+      throw new TypeError(&#x27;unsupported charset in extended field&#x27;)
+  }
+
+  return value
+}
+...</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.content-disposition.parse" id="apidoc.module.content-disposition.parse">module content-disposition.parse</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.content-disposition.parse.parse" id="apidoc.element.content-disposition.parse.parse">
+        function <span class="apidocSignatureSpan">content-disposition.</span>parse
+        <span class="apidocSignatureSpan">(string)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function parse(string) {
+  if (!string || typeof string !== &#x27;string&#x27;) {
+    throw new TypeError(&#x27;argument string is required&#x27;)
+  }
+
+  var match = DISPOSITION_TYPE_REGEXP.exec(string)
+
+  if (!match) {
+    throw new TypeError(&#x27;invalid type format&#x27;)
+  }
+
+  // normalize type
+  var index = match[0].length
+  var type = match[1].toLowerCase()
+
+  var key
+  var names = []
+  var params = {}
+  var value
+
+  // calculate index to start at
+  index = PARAM_REGEXP.lastIndex = match[0].substr(-1) === &#x27;;&#x27;
+    ? index - 1
+    : index
+
+  // match parameters
+  while ((match = PARAM_REGEXP.exec(string))) {
+    if (match.index !== index) {
+      throw new TypeError(&#x27;invalid parameter format&#x27;)
+    }
+
+    index += match[0].length
+    key = match[1].toLowerCase()
+    value = match[2]
+
+    if (names.indexOf(key) !== -1) {
+      throw new TypeError(&#x27;invalid duplicate parameter&#x27;)
+    }
+
+    names.push(key)
+
+    if (key.indexOf(&#x27;*&#x27;) + 1 === key.length) {
+      // decode extended value
+      key = key.slice(0, -1)
+      value = decodefield(value)
+
+      // overwrite existing value
+      params[key] = value
+      continue
+    }
+
+    if (typeof params[key] === &#x27;string&#x27;) {
+      continue
+    }
+
+    if (value[0] === &#x27;&#x22;&#x27;) {
+      // remove quotes and escapes
+      value = value
+        .substr(1, value.length - 2)
+        .replace(QESC_REGEXP, &#x27;$1&#x27;)
+    }
+
+    params[key] = value
+  }
+
+  if (index !== -1 &#x26;&#x26; index !== string.length) {
+    throw new TypeError(&#x27;invalid parameter format&#x27;)
+  }
+
+  return new ContentDisposition(type, params)
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+##### type
+
+Specifies the disposition type, defaults to `&#x22;attachment&#x22;`. This can also be
+`&#x22;inline&#x22;`, or any other value (all values except inline are treated like
+`attachment`, but can convey additional information if both parties agree to
+it). The type is normalized to lower-case.
+
+### contentDisposition.<span class="apidocCodeKeywordSpan">parse</span>(string)
+
+```js
+var disposition = contentDisposition.parse(&#x27;attachment; filename=&#x22;EURO rates.txt&#x22;; filename*=UTF-8\&#x27;\&#x27;%
+e2%82%ac%20rates.txt&#x27;);
+```
+
+Parse a `Content-Disposition` header string. This automatically handles extended
+(&#x22;Unicode&#x22;) parameters by decoding them and providing them under the standard
+...</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.content-disposition.toString" id="apidoc.module.content-disposition.toString">module content-disposition.toString</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.content-disposition.toString.toString" id="apidoc.element.content-disposition.toString.toString">
+        function <span class="apidocSignatureSpan">content-disposition.</span>toString
+        <span class="apidocSignatureSpan">()</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function toString() { [native code] }</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+  var binary = encoded.replace(HEX_ESCAPE_REPLACE_REGEXP, pdecode)
+
+  switch (charset) {
+    case &#x27;iso-8859-1&#x27;:
+      value = getlatin1(binary)
+      break
+    case &#x27;utf-8&#x27;:
+      value = new Buffer(binary, &#x27;binary&#x27;).<span class="apidocCodeKeywordSpan">toString</span>(&#x27;utf8&#x27;)
+      break
+    default:
+      throw new TypeError(&#x27;unsupported charset in extended field&#x27;)
+  }
+
+  return value
+}
 ...</pre></li>
     </ul>
 

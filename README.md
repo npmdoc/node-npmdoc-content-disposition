@@ -1,9 +1,14 @@
-# api documentation for  [content-disposition (v0.5.2)](https://github.com/jshttp/content-disposition#readme)  [![npm package](https://img.shields.io/npm/v/npmdoc-content-disposition.svg?style=flat-square)](https://www.npmjs.org/package/npmdoc-content-disposition) [![travis-ci.org build-status](https://api.travis-ci.org/npmdoc/node-npmdoc-content-disposition.svg)](https://travis-ci.org/npmdoc/node-npmdoc-content-disposition)
+# npmdoc-content-disposition
+
+#### api documentation for  [content-disposition (v0.5.2)](https://github.com/jshttp/content-disposition#readme)  [![npm package](https://img.shields.io/npm/v/npmdoc-content-disposition.svg?style=flat-square)](https://www.npmjs.org/package/npmdoc-content-disposition) [![travis-ci.org build-status](https://api.travis-ci.org/npmdoc/node-npmdoc-content-disposition.svg)](https://travis-ci.org/npmdoc/node-npmdoc-content-disposition)
+
 #### Create and parse Content-Disposition header
 
-[![NPM](https://nodei.co/npm/content-disposition.png?downloads=true)](https://www.npmjs.com/package/content-disposition)
+[![NPM](https://nodei.co/npm/content-disposition.png?downloads=true&downloadRank=true&stars=true)](https://www.npmjs.com/package/content-disposition)
 
-[![apidoc](https://npmdoc.github.io/node-npmdoc-content-disposition/build/screenCapture.buildNpmdoc.browser._2Fhome_2Ftravis_2Fbuild_2Fnpmdoc_2Fnode-npmdoc-content-disposition_2Ftmp_2Fbuild_2Fapidoc.html.png)](https://npmdoc.github.io/node-npmdoc-content-disposition/build/apidoc.html)
+- [https://npmdoc.github.io/node-npmdoc-content-disposition/build/apidoc.html](https://npmdoc.github.io/node-npmdoc-content-disposition/build/apidoc.html)
+
+[![apidoc](https://npmdoc.github.io/node-npmdoc-content-disposition/build/screenCapture.buildCi.browser.%252Ftmp%252Fbuild%252Fapidoc.html.png)](https://npmdoc.github.io/node-npmdoc-content-disposition/build/apidoc.html)
 
 ![npmPackageListing](https://npmdoc.github.io/node-npmdoc-content-disposition/build/screenCapture.npmPackageListing.svg)
 
@@ -21,8 +26,7 @@
     },
     "contributors": [
         {
-            "name": "Douglas Christopher Wilson",
-            "email": "doug@somethingdoug.com"
+            "name": "Douglas Christopher Wilson"
         }
     ],
     "dependencies": {},
@@ -60,13 +64,11 @@
     "license": "MIT",
     "maintainers": [
         {
-            "name": "dougwilson",
-            "email": "doug@somethingdoug.com"
+            "name": "dougwilson"
         }
     ],
     "name": "content-disposition",
     "optionalDependencies": {},
-    "readme": "ERROR: No README data found!",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/jshttp/content-disposition.git"
@@ -79,113 +81,6 @@
     },
     "version": "0.5.2"
 }
-```
-
-
-
-# <a name="apidoc.tableOfContents"></a>[table of contents](#apidoc.tableOfContents)
-
-#### [module content-disposition](#apidoc.module.content-disposition)
-1.  [function <span class="apidocSignatureSpan">content-disposition.</span>parse (string)](#apidoc.element.content-disposition.parse)
-
-
-
-# <a name="apidoc.module.content-disposition"></a>[module content-disposition](#apidoc.module.content-disposition)
-
-#### <a name="apidoc.element.content-disposition.parse"></a>[function <span class="apidocSignatureSpan">content-disposition.</span>parse (string)](#apidoc.element.content-disposition.parse)
-- description and source-code
-```javascript
-function parse(string) {
-  if (!string || typeof string !== 'string') {
-    throw new TypeError('argument string is required')
-  }
-
-  var match = DISPOSITION_TYPE_REGEXP.exec(string)
-
-  if (!match) {
-    throw new TypeError('invalid type format')
-  }
-
-  // normalize type
-  var index = match[0].length
-  var type = match[1].toLowerCase()
-
-  var key
-  var names = []
-  var params = {}
-  var value
-
-  // calculate index to start at
-  index = PARAM_REGEXP.lastIndex = match[0].substr(-1) === ';'
-    ? index - 1
-    : index
-
-  // match parameters
-  while ((match = PARAM_REGEXP.exec(string))) {
-    if (match.index !== index) {
-      throw new TypeError('invalid parameter format')
-    }
-
-    index += match[0].length
-    key = match[1].toLowerCase()
-    value = match[2]
-
-    if (names.indexOf(key) !== -1) {
-      throw new TypeError('invalid duplicate parameter')
-    }
-
-    names.push(key)
-
-    if (key.indexOf('*') + 1 === key.length) {
-      // decode extended value
-      key = key.slice(0, -1)
-      value = decodefield(value)
-
-      // overwrite existing value
-      params[key] = value
-      continue
-    }
-
-    if (typeof params[key] === 'string') {
-      continue
-    }
-
-    if (value[0] === '"') {
-      // remove quotes and escapes
-      value = value
-        .substr(1, value.length - 2)
-        .replace(QESC_REGEXP, '$1')
-    }
-
-    params[key] = value
-  }
-
-  if (index !== -1 && index !== string.length) {
-    throw new TypeError('invalid parameter format')
-  }
-
-  return new ContentDisposition(type, params)
-}
-```
-- example usage
-```shell
-...
-##### type
-
-Specifies the disposition type, defaults to '"attachment"'. This can also be
-'"inline"', or any other value (all values except inline are treated like
-'attachment', but can convey additional information if both parties agree to
-it). The type is normalized to lower-case.
-
-### contentDisposition.parse(string)
-
-'''js
-var disposition = contentDisposition.parse('attachment; filename="EURO rates.txt"; filename*=UTF-8\'\'%e2%82%ac%20rates.txt');
-'''
-
-Parse a 'Content-Disposition' header string. This automatically handles extended
-("Unicode") parameters by decoding them and providing them under the standard
-...
 ```
 
 
